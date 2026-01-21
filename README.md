@@ -10,7 +10,7 @@ Estou construindo uma base sólida em:
 * **SQL (PostgreSQL)**
 * **HTML5 & CSS3**
 
-### Portfólio em destaque
+### Portfólio em Destaque
 
 **Games4Players (Projeto Full Stack)**
 Desenvolvi uma loja virtual completa para aplicar meus estudos.
