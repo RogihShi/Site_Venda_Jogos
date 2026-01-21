@@ -1,6 +1,6 @@
 # Higor
 
-**Desenvolvedor Web em Formação 🚀**
+**Desenvolvedor Web em Formação**
 
 Sou um entusiasta da tecnologia focado em resolver problemas através do código. Gosto de entender como as coisas funcionam, desde a estrutura do banco de dados até a experiência do usuário na tela.
 
@@ -26,6 +26,6 @@ Estou disponível para oportunidades de **entrada (Júnior/Estágio)**. Tenho fa
 
 ---
 
-### ✉️ Vamos conversar?
+### Vamos conversar?
 
 * **LinkedIn:** https://www.linkedin.com/in/higor-sudario-662410195/
