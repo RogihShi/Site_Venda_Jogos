@@ -16,7 +16,7 @@ Estou construindo uma base sólida em:
 Desenvolvi uma loja virtual completa para aplicar meus estudos.
 * **Destaque:** Fui responsável por toda a lógica do sistema, desde o fluxo de login até a persistência dos dados de compras e lista de desejos no banco de dados.
 * **Tecnologias usadas:** Node.js, Express, Postgres e Vanilla JS.
-* [Acessar Repositório](LINK_DO_SEU_REPOSITORIO)
+* [Acessar Repositório]https://github.com/RogihShi/Site_Venda_Jogos
 
 ---
 
