@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Games4Player - Acessar Conta</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <style>
+        /* Define a cor de fundo preta para garantir o visual dark mesmo se o style.css falhar */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #0d0d0d;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Centraliza o card de login no meio da tela (vertical e horizontal) */
+        .login-section {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding-top: 60px; /* Espaço para o cabeçalho fixo não cobrir o card */
+        }
+
+        /* O quadrado preto onde ficam os inputs */
+        .login-card {
+            background-color: #1a1a1a;
+            padding: 40px;
+            border-radius: 15px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); /* Sombra suave */
+            border: 1px solid #333;
+        }
+
+        /* Os botões "Entrar" e "Cadastrar" no topo do card */
+        .form-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        /* Estilo dos botões de aba */
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            background: none;
+            border: none;
+            border-bottom: 2px solid #333; /* Linha cinza embaixo */
+            color: #888;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        /* Estilo da aba ativa (a que está selecionada) */
+        .tab-btn.active {
+            border-bottom-color: var(--accent-color); /* Linha roxa */
+            color: white;
+        }
+
+        /* Classe que esconde os formulários por padrão */
+        .auth-form {
+            display: none;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Classe que faz o formulário aparecer (quando clicamos na aba) */
+        .auth-form.active {
+            display: flex;
+        }
+
+        /* Títulos dentro do formulário */
+        .auth-form h2 { margin: 0; color: white; }
+        .auth-form p { margin: 0; color: #aaa; font-size: 0.9rem; }
+
+        /* Caixinhas dos Inputs (com ícone dentro) */
+        .input-group {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Ícone dentro do input */
+        .input-group .material-icons {
+            position: absolute;
+            left: 12px;
+            color: #888;
+        }
+
+        /* O campo de texto em si */
+        .input-group input {
+            width: 100%;
+            padding: 12px 12px 12px 45px; /* Padding esquerda maior para caber o ícone */
+            background-color: #262626;
+            border: 1px solid #444;
+            border-radius: 8px;
+            color: white;
+            outline: none;
+        }
+
+        /* Brilho roxo ao clicar no input */
+        .input-group input:focus {
+            border-color: var(--accent-color);
+        }
+
+        .forgot-pass {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-size: 0.85rem;
+            align-self: flex-end; /* Alinha à direita */
+        }
+
+        .btn-submit {
+            padding: 12px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-submit:hover {
+            opacity: 0.9;
+            transform: translateY(-2px); /* Leve subida ao passar o mouse */
+        }
+
+        /* Modal "Esqueceu a Senha" */
+        .modal {
+            display: none; /* Escondido por padrão */
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.8); /* Fundo escuro transparente */
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: #1a1a1a;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-cancel { background: #444; color: white; border: none; padding: 10px; flex: 1; border-radius: 5px; cursor: pointer; }
+        .btn-confirm { background: var(--accent-color); color: white; border: none; padding: 10px; flex: 1; border-radius: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-left">
+            <a href="index.html" class="menu-btn"><span class="material-icons">arrow_back</span></a>
+            <a href="index.html" class="logo">Games4Player</a>
+        </div>
+    </header>
+
+    <main class="login-section">
+        <div class="login-card">
+            
+            <div class="form-tabs">
+                <button class="tab-btn active" id="tabLogin">Entrar</button>
+                <button class="tab-btn" id="tabCadastro">Cadastrar</button>
+            </div>
+
+            <form id="formLogin" class="auth-form active">
+                <h2>Bem-vindo de volta!</h2>
+                <p>Acesse sua biblioteca de jogos.</p>
+                
+                <div class="input-group">
+                    <span class="material-icons">email</span>
+                    <input type="email" id="emailLogin" placeholder="Seu E-mail" required>
+                </div>
+                <div class="input-group">
+                    <span class="material-icons">lock</span>
+                    <input type="password" id="senhaLogin" placeholder="Sua Senha" required>
+                </div>
+                
+                <a href="#" class="forgot-pass" id="linkEsqueceuSenha">Esqueceu a senha?</a>
+                
+                <button type="submit" class="btn-submit">Entrar</button>
+            </form>
+
+            <form id="formCadastro" class="auth-form">
+                <h2>Crie sua conta</h2>
+                <p>Comece sua coleção hoje mesmo.</p>
+
+                <div class="input-group">
+                    <span class="material-icons">person</span>
+                    <input type="text" id="inputNomeCadastro" placeholder="Nome de Usuário" required>
+                </div>
+                
+                <div class="input-group">
+                    <span class="material-icons">email</span>
+                    <input type="email" placeholder="Seu E-mail" required>
+                </div>
+                
+                <div class="input-group">
+                    <span class="material-icons">lock</span>
+                    <input type="password" placeholder="Crie uma Senha" required>
+                </div>
+                <div class="input-group">
+                    <span class="material-icons">lock_reset</span>
+                    <input type="password" placeholder="Confirme a Senha" required>
+                </div>
+
+                <button type="submit" class="btn-submit">Criar Conta</button>
+            </form>
+
+        </div>
+    </main>
+
+    <div id="modalRedefinir" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" id="fecharModalRedefinir" style="float: right; cursor: pointer; color: white;">&times;</span>
+            <span class="material-icons check-icon" style="color: var(--accent-color); font-size: 48px;">lock_reset</span>
+            
+            <h2 style="margin-bottom: 10px; color: white;">Redefinir Senha</h2>
+            <p style="color: #ccc; margin-bottom: 20px;">Confirme seu e-mail e escolha uma nova senha.</p>
+            
+            <form id="formRedefinir" style="display: flex; flex-direction: column; gap: 15px;">
+                <div class="input-group">
+                    <span class="material-icons">email</span>
+                    <input type="email" id="emailRedefinir" placeholder="Seu E-mail Cadastrado" required>
+                </div>
+                <div class="input-group">
+                    <span class="material-icons">lock</span>
+                    <input type="password" id="novaSenha" placeholder="Nova Senha" required>
+                </div>
+                
+                <div class="modal-buttons">
+                    <button type="button" class="btn-cancel" id="btnCancelarRedefinir">Cancelar</button>
+                    <button type="submit" class="btn-confirm">Salvar Nova Senha</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script>
+        const API_URL = "http://localhost:3000"; 
+
+        // Elementos do DOM (Pegando as tags pelo ID)
+        const tabLogin = document.getElementById('tabLogin');
+        const tabCadastro = document.getElementById('tabCadastro');
+        const formLogin = document.getElementById('formLogin');
+        const formCadastro = document.getElementById('formCadastro');
+        const toastContainer = document.getElementById('toastContainer');
+        const inputEmail = document.getElementById('emailLogin'); 
+
+        // --- 1. RECUPERAR E-MAIL SALVO (UX) ---
+        // Se o usuário já logou antes, preenche o e-mail sozinho para ele não digitar de novo
+        document.addEventListener('DOMContentLoaded', () => {
+            const emailSalvo = localStorage.getItem('emailSalvo');
+            if (emailSalvo) {
+                inputEmail.value = emailSalvo;
+            }
+        });
+
+        // --- 2. FUNÇÃO DE NOTIFICAÇÃO (Toast) ---
+        // Cria aquela barrinha colorida que aparece e some no canto da tela
+        function mostrarNotificacao(mensagem, tipo = 'error') {
+            const toast = document.createElement('div');
+            toast.classList.add('toast', tipo); // Adiciona cor (verde ou vermelha)
+            
+            const icone = tipo === 'success' ? 'check_circle' : 'error';
+            
+            toast.innerHTML = `
+                <span class="material-icons">${icone}</span>
+                <span>${mensagem}</span>
+            `;
+
+            toastContainer.appendChild(toast);
+
+            // Animação de saída após 4 segundos
+            setTimeout(() => {
+                toast.style.animation = "fadeOut 0.4s ease forwards";
+                setTimeout(() => toast.remove(), 400); // Remove do HTML para não pesar
+            }, 4000);
+        }
+
+        // --- 3. LÓGICA DE ABAS (Troca Login <-> Cadastro) ---
+        tabLogin.addEventListener('click', () => {
+            tabLogin.classList.add('active'); tabCadastro.classList.remove('active');
+            formLogin.classList.add('active'); formCadastro.classList.remove('active');
+        });
+
+        tabCadastro.addEventListener('click', () => {
+            tabCadastro.classList.add('active'); tabLogin.classList.remove('active');
+            formCadastro.classList.add('active'); formLogin.classList.remove('active');
+        });
+
+        // --- 4. LÓGICA DE LOGIN ---
+        formLogin.addEventListener('submit', async (e) => {
+            e.preventDefault(); // Impede a página de recarregar
+            
+            const email = inputEmail.value;
+            const senha = document.getElementById('senhaLogin').value;
+            const btn = formLogin.querySelector('button'); // Pega o botão para desabilitar
+
+            try {
+                btn.innerText = "Verificando...";
+                btn.disabled = true; // Trava o botão para evitar clique duplo
+
+                // Manda os dados para o servidor
+                const resposta = await fetch(`${API_URL}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email, senha: senha })
+                });
+
+                const dados = await resposta.json();
+
+                if (dados.sucesso) {
+                    mostrarNotificacao("Login realizado com sucesso!", "success");
+                    
+                    // SALVA OS DADOS NO NAVEGADOR
+                    localStorage.setItem('emailSalvo', email); // Para a próxima vez
+                    localStorage.setItem('usuarioLogado', 'true');
+                    localStorage.setItem('usuarioId', dados.usuario.id);
+                    localStorage.setItem('nomeUsuario', dados.usuario.nome);
+                    localStorage.setItem('emailUsuario', dados.usuario.email);
+
+                    // Redireciona para a Home depois de 1.5s
+                    setTimeout(() => { window.location.href = "index.html"; }, 1500);
+                } else {
+                    mostrarNotificacao(dados.mensagem, "error"); // Ex: "Senha incorreta"
+                }
+
+            } catch (erro) {
+                console.error(erro);
+                mostrarNotificacao("Erro ao conectar com o servidor.", "error");
+            } finally {
+                btn.innerText = "Entrar"; // Volta o texto original
+                btn.disabled = false; // Destrava o botão
+            }
+        });
+
+        // --- 5. LÓGICA DE CADASTRO ---
+        formCadastro.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const nome = document.getElementById('inputNomeCadastro').value;
+            const email = formCadastro.querySelector('input[type="email"]').value;
+            const senhas = formCadastro.querySelectorAll('input[type="password"]');
+            const senha = senhas[0].value;
+            const confirmaSenha = senhas[1].value;
+            const btn = formCadastro.querySelector('button');
+
+            // Validação local antes de enviar
+            if (senha !== confirmaSenha) {
+                mostrarNotificacao("As senhas não coincidem!", "error");
+                return;
+            }
+
+            try {
+                btn.innerText = "Criando conta...";
+                btn.disabled = true;
+
+                const resposta = await fetch(`${API_URL}/cadastro`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nome: nome, email: email, senha: senha })
+                });
+
+                const dados = await resposta.json();
+
+                if (dados.sucesso) {
+                    mostrarNotificacao("Conta criada! Faça login agora.", "success");
+                    formCadastro.reset(); // Limpa os campos
+                    
+                    // Muda automaticamente para a aba de Login
+                    setTimeout(() => {
+                        tabLogin.click();
+                        document.getElementById('emailLogin').value = email; // Já preenche o email
+                    }, 2000);
+                } else {
+                    mostrarNotificacao(dados.mensagem, "error"); // Ex: "E-mail já cadastrado"
+                }
+
+            } catch (erro) {
+                console.error(erro);
+                mostrarNotificacao("Erro ao conectar com o servidor.", "error");
+            } finally {
+                btn.innerText = "Criar Conta";
+                btn.disabled = false;
+            }
+        });
+
+        // --- 6. LÓGICA DO MODAL (ESQUECEU SENHA) ---
+        // Basicamente abre e fecha a janelinha e envia o pedido de troca de senha
+        const linkEsqueceuSenha = document.getElementById('linkEsqueceuSenha');
+        const modalRedefinir = document.getElementById('modalRedefinir');
+        const fecharModalRedefinir = document.getElementById('fecharModalRedefinir');
+        const btnCancelarRedefinir = document.getElementById('btnCancelarRedefinir');
+        const formRedefinir = document.getElementById('formRedefinir');
+
+        linkEsqueceuSenha.addEventListener('click', (e) => {
+            e.preventDefault();
+            modalRedefinir.style.display = 'flex';
+            if(inputEmail.value) {
+                document.getElementById('emailRedefinir').value = inputEmail.value;
+            }
+        });
+
+        function fecharModal() { modalRedefinir.style.display = 'none'; }
+        fecharModalRedefinir.addEventListener('click', fecharModal);
+        btnCancelarRedefinir.addEventListener('click', fecharModal);
+
+        formRedefinir.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('emailRedefinir').value;
+            const novaSenha = document.getElementById('novaSenha').value;
+            const btn = formRedefinir.querySelector('button[type="submit"]');
+
+            try {
+                btn.innerText = "Salvando...";
+                btn.disabled = true;
+                const resposta = await fetch(`${API_URL}/redefinir-senha`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email, novaSenha: novaSenha })
+                });
+                const dados = await resposta.json();
+                if (dados.sucesso) {
+                    mostrarNotificacao("Senha alterada com sucesso!", "success");
+                    fecharModal();
+                    document.getElementById('emailRedefinir').value = '';
+                    document.getElementById('novaSenha').value = '';
+                } else {
+                    mostrarNotificacao(dados.mensagem, "error");
+                }
+            } catch (erro) {
+                mostrarNotificacao("Erro no servidor.", "error");
+            } finally {
+                btn.innerText = "Salvar Nova Senha";
+                btn.disabled = false;
+            }
+        });
+
+        // Fecha o modal se clicar fora dele (fundo preto)
+        window.onclick = (event) => {
+            if (event.target == modalRedefinir) {
+                fecharModal();
+            }
+        }
+    </script>
+</body>
+</html>

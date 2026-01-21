@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Games4Player - Lista de Desejos</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <style>
+        /* Container do campo de busca local (só dentro da lista de desejos) */
+        .filter-container {
+            display: flex;
+            justify-content: flex-start;
+            margin-bottom: 20px;
+        }
+        
+        /* Estilo da barra de busca interna */
+        .local-search {
+            background-color: #333;
+            border: 1px solid #555;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 20px;
+            width: 300px;
+            outline: none;
+            font-size: 0.95rem;
+            transition: 0.3s;
+        }
+        
+        /* Efeito de brilho roxo ao clicar na busca */
+        .local-search:focus {
+            border-color: var(--accent-color);
+            background-color: #222;
+            box-shadow: 0 0 10px rgba(138, 43, 226, 0.2);
+        }
+
+        /* ANIMAÇÃO DE REMOÇÃO:
+           Quando clicamos na lixeira, o card ganha essa classe 'removing'.
+           Ela faz o card ficar transparente (opacity: 0) e diminuir (scale: 0.9)
+           dando a sensação visual de que o item foi deletado.
+        */
+        .card.removing {
+            opacity: 0;
+            transform: scale(0.9);
+            transition: 0.3s;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-left">
+            <button class="menu-btn" id="btnMenu"><span class="material-icons">menu</span></button>
+            <a href="index.html" class="logo">Games4Player</a>
+        </div>
+        
+        <div class="user-area">
+            <a href="login.html" class="btn-login-header hidden" id="btnEntrarHeader">
+                <span class="material-icons">login</span> Entrar
+            </a>
+            <div class="user-profile hidden" id="userProfile">
+                <span class="material-icons">account_circle</span>
+                <span id="nomeUsuarioDisplay">Visitante</span>
+                <div class="dropdown-menu">
+                    <a href="biblioteca.html">Meus Jogos</a>
+                    <a href="desejos.html">Lista de Desejos</a>
+                    <a href="#" class="logout" id="btnSair">Sair</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <nav class="sidebar" id="sidebar">
+        <h3>Início</h3>
+        <ul>
+            <li><a href="index.html" style="display: flex; align-items: center; gap: 10px;">
+                <span class="material-icons">store</span> Loja
+            </a></li>
+        </ul>
+        <br>
+        <h3>Categorias</h3>
+        <ul>
+            <li><a href="index.html?categoria=aventura">Aventura</a></li>
+            <li><a href="index.html?categoria=acao">Ação</a></li>
+            <li><a href="index.html?categoria=terror">Terror</a></li>
+            <li><a href="index.html?categoria=metroidvania">Metroidvania</a></li>
+            <li><a href="index.html?categoria=soulslike">Souls-like</a></li>
+            <li><a href="index.html?categoria=roguelike">Roguelike</a></li>
+            <li><a href="index.html?categoria=fps">FPS</a></li>
+            <li><a href="index.html?categoria=rpg">RPG</a></li>
+        </ul>
+    </nav>
+
+    <main style="padding-top: 100px;"> <section class="game-list">
+            
+            <h2 style="display: flex; align-items: center; gap: 10px;">
+                <span class="material-icons" style="color: var(--accent-color);">favorite</span> 
+                Minha Lista de Desejos
+            </h2>
+            
+            <p style="color: #aaa; margin-bottom: 20px;">Jogos que você está de olho.</p>
+
+            <div class="filter-container">
+                <input type="text" id="filtroDesejos" class="local-search" placeholder="Buscar na lista de desejos...">
+            </div>
+
+            <div class="cards-container" id="containerDesejos">
+                </div>
+        </section>
+    </main>
+
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script>
+        const API_URL = "http://localhost:3000";
+
+        // --- 1. CONFIGURAÇÕES DE INTERFACE ---
+        const btnMenu = document.getElementById('btnMenu');
+        const sidebar = document.getElementById('sidebar');
+        btnMenu.addEventListener('click', () => sidebar.classList.add('active'));
+        sidebar.addEventListener('mouseleave', () => sidebar.classList.remove('active'));
+
+        // Pega os dados do usuário do navegador
+        const usuarioLogado = localStorage.getItem('usuarioLogado');
+        const usuarioId = localStorage.getItem('usuarioId');
+        const nomeSalvo = localStorage.getItem('nomeUsuario') || "Visitante";
+
+        // VERIFICA SE ESTÁ LOGADO
+        if (usuarioLogado === 'true') {
+            // Mostra o perfil do usuário
+            document.getElementById('userProfile').classList.remove('hidden');
+            document.getElementById('btnEntrarHeader').classList.add('hidden');
+            document.getElementById('nomeUsuarioDisplay').innerText = nomeSalvo;
+            
+            // CARREGA A LISTA DE JOGOS
+            carregarListaDesejos();
+        } else {
+            // Se não estiver logado, avisa o usuário
+            document.getElementById('btnEntrarHeader').classList.remove('hidden');
+            document.querySelector('.game-list').innerHTML = "<h2 style='text-align:center; margin-top:50px; color: #fff;'>Faça login para ver sua lista de desejos.</h2>";
+        }
+
+        // Botão Sair
+        document.getElementById('btnSair')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.clear();
+            window.location.href = "index.html";
+        });
+
+        // --- 2. CARREGAR LISTA DO BANCO DE DADOS ---
+        async function carregarListaDesejos() {
+            const container = document.getElementById('containerDesejos');
+            
+            try {
+                // Chama a rota específica que traz APENAS os desejos deste usuário
+                const resposta = await fetch(`${API_URL}/desejos/${usuarioId}`);
+                const lista = await resposta.json();
+
+                // Se a lista veio vazia (array com 0 itens)
+                if (lista.length === 0) {
+                    container.innerHTML = "<p style='color: #ccc; margin-top: 20px;'>Sua lista está vazia. Vá explorar a loja!</p>";
+                    return;
+                }
+
+                container.innerHTML = ""; // Limpa antes de adicionar
+
+                lista.forEach((jogo) => {
+                    const card = document.createElement('div');
+                    card.classList.add('card');
+                    
+                    // IMPORTANTE: Adiciona o nome do jogo num atributo escondido (data-name)
+                    // Isso ajuda a busca local a encontrar o jogo facilmente depois
+                    card.setAttribute('data-name', jogo.titulo.toLowerCase());
+                    
+                    // ID único para podermos apagar esse card específico depois
+                    card.id = `card-jogo-${jogo.id}`; 
+
+                    const precoFormatado = parseFloat(jogo.preco).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                    const imagemCompleta = `${API_URL}/${jogo.imagem_url}`;
+
+                    // HTML do Card (Diferença: Botão Ver Detalhes + Botão Lixeira)
+                    card.innerHTML = `
+                        <div class="card-image" style="background-image: url('${imagemCompleta}');" onclick="window.location.href='paginaJogo.html?id=${jogo.id}'"></div>
+                        <div class="card-info">
+                            <h3>${jogo.titulo}</h3>
+                            <span class="price">${precoFormatado}</span>
+                            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                                <button onclick="window.location.href='paginaJogo.html?id=${jogo.id}'" style="flex: 2;">Ver Detalhes</button>
+                                
+                                <button class="btn-remove" onclick="removerDesejo(${jogo.id})" style="flex: 1; border: 1px solid #ff4444; color: #ff4444; background: transparent; cursor: pointer;">
+                                    <span class="material-icons">delete</span>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (erro) {
+                console.error("Erro ao buscar desejos:", erro);
+            }
+        }
+
+        // --- 3. REMOVER JOGO DA LISTA (LÓGICA DA LIXEIRA) ---
+        async function removerDesejo(jogoId) {
+            // 1. Feedback Visual Imediato: Faz o card sumir devagarinho
+            const card = document.getElementById(`card-jogo-${jogoId}`);
+            if (card) card.classList.add('removing'); // Adiciona a classe CSS que diminui a opacidade
+
+            try {
+                // 2. Manda a ordem de deletar para o servidor
+                const resposta = await fetch(`${API_URL}/desejos/${usuarioId}/${jogoId}`, {
+                    method: 'DELETE'
+                });
+
+                if (resposta.ok) {
+                    // 3. Se deu certo, recarrega a lista após 300ms (tempo da animação)
+                    // Isso garante que a lista fique sempre sincronizada
+                    setTimeout(() => carregarListaDesejos(), 300);
+                } else {
+                    // Se deu erro, desfaz a animação (o card volta a aparecer)
+                    if (card) card.classList.remove('removing');
+                    console.error("Erro ao remover do servidor");
+                }
+            } catch (erro) {
+                if (card) card.classList.remove('removing');
+                console.error("Erro na requisição de remoção:", erro);
+            }
+        }
+
+        // --- 4. FILTRO LOCAL (BUSCA SEM RECARREGAR) ---
+        // Diferente do Index, aqui filtramos os cards que já estão na tela
+        const inputFiltro = document.getElementById('filtroDesejos');
+        if (inputFiltro) {
+            inputFiltro.addEventListener('input', (e) => {
+                const termo = e.target.value.toLowerCase(); // O que foi digitado
+                const cards = document.querySelectorAll('.card');
+
+                cards.forEach(card => {
+                    // Pega o nome guardado no atributo data-name
+                    const nomeJogo = card.getAttribute('data-name');
+                    
+                    // Se o nome contém o termo, mostra (flex). Se não, esconde (none).
+                    card.style.display = nomeJogo.includes(termo) ? "flex" : "none";
+                });
+            });
+        }
+    </script>
+</body>
+</html>

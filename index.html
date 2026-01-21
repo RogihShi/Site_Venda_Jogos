@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="pt-br"> <head>
+    <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>Games4Player - Início</title>
+    
+    <link rel="stylesheet" href="style.css">
+    
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+
+    <header>
+        <div class="header-left">
+            <button class="menu-btn" id="btnMenu"><span class="material-icons">menu</span></button>
+            <a href="index.html" class="logo">Games4Player</a>
+        </div>
+        
+        <div class="search-bar">
+            <input type="text" id="campoPesquisa" placeholder="Pesquisar jogos...">
+            <button id="btnPesquisar"><span class="material-icons">search</span></button>
+        </div>
+        
+        <div class="user-area">
+            <a href="login.html" class="btn-login-header hidden" id="btnEntrarHeader">
+                <span class="material-icons">login</span> Entrar
+            </a>
+            
+            <div class="user-profile hidden" id="userProfile">
+                <span class="material-icons">account_circle</span>
+                <span id="nomeUsuarioDisplay">Visitante</span> <div class="dropdown-menu">
+                    <a href="biblioteca.html">Meus Jogos</a>
+                    <a href="desejos.html">Lista de Desejos</a>
+                    <a href="#" class="logout" id="btnSair">Sair</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <nav class="sidebar" id="sidebar">
+        <h3>Início</h3>
+        <ul>
+            <li><a href="index.html" style="display: flex; align-items: center; gap: 10px;">
+                <span class="material-icons">store</span> Loja
+            </a></li>
+        </ul>
+        <br>
+        <h3>Categorias</h3>
+        <ul>
+            <li><a href="index.html?categoria=aventura">Aventura</a></li>
+            <li><a href="index.html?categoria=acao">Ação</a></li>
+            <li><a href="index.html?categoria=terror">Terror</a></li>
+            <li><a href="index.html?categoria=metroidvania">Metroidvania</a></li>
+            <li><a href="index.html?categoria=soulslike">Souls-like</a></li>
+            <li><a href="index.html?categoria=roguelike">Roguelike</a></li>
+            <li><a href="index.html?categoria=fps">FPS</a></li>
+            <li><a href="index.html?categoria=rpg">RPG</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section class="hero" id="heroSection">
+            <button class="nav-btn prev" id="btnPrev">❮</button> <div class="hero-content">
+                <div class="game-info">
+                    <h1 id="heroTitle">Carregando...</h1> <button class="btn-buy" id="btnHeroDetalhes">Ver Detalhes</button>
+                </div>
+            </div>
+            
+            <button class="nav-btn next" id="btnNext">❯</button> </section>
+
+        <section class="game-list">
+            <h2 id="tituloLista">Todos os Jogos</h2>
+            <div class="cards-container" id="cardsContainer">
+                <p style="color:white; text-align:center; width:100%;">Conectando ao banco de dados...</p>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const API_URL = "http://localhost:3000"; // Onde está o seu servidor Back-end
+        let listaDeJogos = []; // Uma variável global para guardar os jogos depois que baixar do servidor
+
+        // --- 1. FUNÇÃO PRINCIPAL: BUSCAR DADOS ---
+        // 'async' significa que essa função vai esperar algo demorado (internet/banco)
+        async function carregarJogosDoServidor() {
+            try {
+                // 'fetch' vai até o servidor buscar a lista
+                const resposta = await fetch(`${API_URL}/jogos`);
+                // Converte a resposta bruta em JSON (dados que o JS entende)
+                listaDeJogos = await resposta.json();
+                
+                // Depois que baixou, chama as funções para desenhar a tela
+                processarFiltrosIniciais(); // Verifica se tem ?categoria=rpg na URL
+                configurarBanner(); // Monta o banner rotativo
+            } catch (erro) {
+                // Se o servidor estiver desligado, avisa o usuário
+                console.error("Erro ao buscar jogos:", erro);
+                document.getElementById('cardsContainer').innerHTML = 
+                    "<h3 style='color: red; text-align:center;'>Erro ao conectar com o servidor.</h3>";
+            }
+        }
+
+        // --- 2. FUNÇÃO QUE DESENHA OS CARDS NA TELA ---
+        // Ela recebe uma lista (pode ser todos os jogos ou só os filtrados)
+        function renderizarJogos(lista) {
+            const cardsContainer = document.getElementById('cardsContainer');
+            cardsContainer.innerHTML = ""; // Limpa a tela (remove o texto "Carregando...")
+
+            // Se a lista estiver vazia (ex: pesquisou "Zelda" e não tem)
+            if (lista.length === 0) {
+                cardsContainer.innerHTML = "<h3 style='color: #aaa; text-align:center; width:100%; margin-top: 50px;'>Nenhum jogo encontrado nesta categoria.</h3>";
+                return;
+            }
+            
+            // Loop: Para cada jogo na lista, cria o HTML do quadradinho
+            lista.forEach(jogo => {
+                const card = document.createElement('div'); // Cria uma <div> vazia
+                card.classList.add('card'); // Adiciona a classe CSS .card
+                
+                // Formata o preço (ex: 50 virar R$ 50,00)
+                const precoFormatado = parseFloat(jogo.preco).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                const imagemCompleta = `${API_URL}/${jogo.imagem_url}`; // Monta o link da imagem
+
+                // Preenche o HTML de dentro do card
+                card.innerHTML = `
+                    <div class="card-image" style="background-image: url('${imagemCompleta}');" onclick="window.location.href='paginaJogo.html?id=${jogo.id}'" style="cursor: pointer;"></div>
+                    <div class="card-info">
+                        <h3>${jogo.titulo}</h3>
+                        <span class="price">${precoFormatado}</span>
+                        <button onclick="window.location.href='paginaJogo.html?id=${jogo.id}'">Comprar</button>
+                    </div>
+                `;
+                // Adiciona o card pronto dentro do container principal
+                cardsContainer.appendChild(card);
+            });
+        }
+
+        // --- 3. LÓGICA DE FILTROS E PESQUISA ---
+        const campoPesquisa = document.getElementById('campoPesquisa');
+        const btnPesquisar = document.getElementById('btnPesquisar');
+        const heroSection = document.getElementById('heroSection');
+        const tituloLista = document.getElementById('tituloLista');
+
+        // Essa função roda assim que a página abre para ver se tem filtros na URL
+        function processarFiltrosIniciais() {
+            // URLSearchParams lê o que está depois da '?' no link
+            const params = new URLSearchParams(window.location.search);
+            const categoriaURL = params.get('categoria'); // ex: rpg
+            const buscaURL = params.get('busca'); // ex: dark souls
+
+            if (categoriaURL) {
+                filtrarPorCategoria(categoriaURL); // Se tem categoria, filtra
+            } else if (buscaURL) {
+                campoPesquisa.value = buscaURL; // Preenche a barra de pesquisa
+                executarPesquisa(buscaURL); // E filtra por nome
+            } else {
+                renderizarJogos(listaDeJogos); // Se não tem nada, mostra tudo
+            }
+        }
+
+        // Função ÚTIL: Limpa acentos e maiúsculas para comparar textos
+        // Ex: Transforma "Ação" em "acao" e "RPG" em "rpg"
+        function limparTexto(texto) {
+            return texto.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        }
+
+        function executarPesquisa(termo) {
+            const busca = limparTexto(termo.trim());
+            
+            // Se o usuário apagou a pesquisa, volta ao normal
+            if (busca === "") {
+                heroSection.style.display = "flex"; // Mostra o banner de volta
+                tituloLista.innerText = "Todos os Jogos";
+                renderizarJogos(listaDeJogos);
+                return;
+            }
+
+            // Se pesquisou, esconde o banner para focar nos resultados
+            heroSection.style.display = "none";
+            tituloLista.innerText = `Resultados para: "${termo}"`;
+
+            // O filtro mágico:
+            const filtrados = listaDeJogos.filter(j => 
+                // Verifica se o Título contem o termo...
+                limparTexto(j.titulo).includes(busca) || 
+                // ...OU se alguma categoria contem o termo
+                (j.categorias && j.categorias.some(cat => limparTexto(cat).includes(busca)))
+            );
+            renderizarJogos(filtrados);
+        }
+
+        function filtrarPorCategoria(catURL) {
+            heroSection.style.display = "none";
+            tituloLista.innerText = `Categoria: ${catURL.toUpperCase()}`;
+            
+            const categoriaLimpaURL = limparTexto(catURL);
+
+            // Filtro das categorias (aquele problema que resolvemos dos acentos)
+            const filtrados = listaDeJogos.filter(j => {
+                if (!j.categorias) return false;
+                // Verifica se ALGUMA (some) categoria do jogo bate com a URL
+                return j.categorias.some(catBanco => {
+                    return limparTexto(catBanco) === categoriaLimpaURL;
+                });
+            });
+
+            renderizarJogos(filtrados);
+        }
+
+        // Eventos de clique (Botão Lupa e Tecla Enter)
+        btnPesquisar.addEventListener('click', () => executarPesquisa(campoPesquisa.value));
+        campoPesquisa.addEventListener('keyup', (e) => { if (e.key === 'Enter') executarPesquisa(campoPesquisa.value); });
+
+        // --- 4. BANNER ROTATIVO (CARROSSEL) ---
+        let jogosDestaque = [];
+        let indiceBanner = 0;
+        let bannerTimer;
+
+        function configurarBanner() {
+            // Pega uma cópia da lista, embaralha (random) e pega os 6 primeiros
+            jogosDestaque = [...listaDeJogos].sort(() => Math.random() - 0.5).slice(0, 6);
+            if (jogosDestaque.length > 0) {
+                atualizarBanner();
+                iniciarTimerBanner();
+            }
+        }
+
+        function atualizarBanner() {
+            const jogo = jogosDestaque[indiceBanner];
+            // Troca o título e a imagem de fundo do banner
+            document.getElementById('heroTitle').innerText = jogo.titulo;
+            // O gradiente serve para escurecer a imagem e deixar o texto legível
+            document.getElementById('heroSection').style.backgroundImage = `linear-gradient(to top, rgba(0,0,0,0.9), transparent), url('${API_URL}/${jogo.imagem_url}')`;
+        }
+
+        // Clique no botão "Ver Detalhes" do Banner
+        document.getElementById('btnHeroDetalhes').addEventListener('click', () => {
+            const jogoAtual = jogosDestaque[indiceBanner];
+            if (jogoAtual) window.location.href = `paginaJogo.html?id=${jogoAtual.id}`;
+        });
+
+        // Timer que troca a imagem a cada 7 segundos (7000ms)
+        function iniciarTimerBanner() {
+            clearInterval(bannerTimer); // Limpa timer antigo para não encavalar
+            bannerTimer = setInterval(() => {
+                indiceBanner = (indiceBanner + 1) % jogosDestaque.length; // Loop infinito
+                atualizarBanner();
+            }, 7000);
+        }
+
+        // Botões de Seta do Banner
+        document.getElementById('btnNext').onclick = () => { indiceBanner = (indiceBanner + 1) % jogosDestaque.length; atualizarBanner(); iniciarTimerBanner(); };
+        document.getElementById('btnPrev').onclick = () => { indiceBanner = (indiceBanner - 1 + jogosDestaque.length) % jogosDestaque.length; atualizarBanner(); iniciarTimerBanner(); };
+
+        // --- 5. USUÁRIO E MENU ---
+        // Abre e fecha a Sidebar
+        document.getElementById('btnMenu').onclick = () => document.getElementById('sidebar').classList.toggle('active');
+        
+        // Verifica se está logado olhando o LocalStorage
+        if (localStorage.getItem('usuarioLogado') === 'true') {
+            // Se SIM: Mostra perfil, esconde botão entrar
+            document.getElementById('userProfile').classList.remove('hidden');
+            document.getElementById('nomeUsuarioDisplay').innerText = localStorage.getItem('nomeUsuario');
+            document.getElementById('btnEntrarHeader').classList.add('hidden');
+        } else {
+            // Se NÃO: Mostra botão entrar
+            document.getElementById('btnEntrarHeader').classList.remove('hidden');
+        }
+
+        // Botão Sair: Limpa a memória do navegador e recarrega
+        document.getElementById('btnSair').onclick = (e) => {
+            e.preventDefault();
+            localStorage.clear();
+            window.location.href = "index.html";
+        };
+
+        // --- PONTO DE PARTIDA ---
+        // Tudo começa aqui. O script chama essa função para iniciar o site.
+        carregarJogosDoServidor();
+    </script>
+</body>
+</html>

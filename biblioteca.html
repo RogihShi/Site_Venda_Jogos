@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Games4Player - Meus Jogos</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <style>
+        /* Estilo da caixa de busca local (igual à página de desejos) */
+        .filter-container {
+            display: flex;
+            justify-content: flex-start;
+            margin-bottom: 20px;
+        }
+        
+        .local-search {
+            background-color: #333;
+            border: 1px solid #555;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 20px;
+            width: 300px;
+            outline: none;
+            font-size: 0.95rem;
+            transition: 0.3s;
+        }
+        
+        .local-search:focus {
+            border-color: var(--accent-color);
+            background-color: #222;
+            box-shadow: 0 0 10px rgba(138, 43, 226, 0.2);
+        }
+
+        /* Texto pequeno para mostrar quando o jogo foi comprado */
+        .data-compra {
+            color: #aaa;
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-left">
+            <button class="menu-btn" id="btnMenu"><span class="material-icons">menu</span></button>
+            <a href="index.html" class="logo">Games4Player</a>
+        </div>
+        
+        <div class="user-area">
+            <a href="login.html" class="btn-login-header hidden" id="btnEntrarHeader">
+                <span class="material-icons">login</span> Entrar
+            </a>
+            <div class="user-profile hidden" id="userProfile">
+                <span class="material-icons">account_circle</span>
+                <span id="nomeUsuarioDisplay">Visitante</span>
+                <div class="dropdown-menu">
+                    <a href="biblioteca.html">Meus Jogos</a>
+                    <a href="desejos.html">Lista de Desejos</a>
+                    <a href="#" class="logout" id="btnSair">Sair</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <nav class="sidebar" id="sidebar">
+        <h3>Início</h3>
+        <ul>
+            <li><a href="index.html" style="display: flex; align-items: center; gap: 10px;">
+                <span class="material-icons">store</span> Loja
+            </a></li>
+        </ul>
+        <br>
+        <h3>Categorias</h3>
+        <ul>
+            <li><a href="index.html?categoria=aventura">Aventura</a></li>
+            <li><a href="index.html?categoria=acao">Ação</a></li>
+            <li><a href="index.html?categoria=terror">Terror</a></li>
+            <li><a href="index.html?categoria=metroidvania">Metroidvania</a></li>
+            <li><a href="index.html?categoria=soulslike">Souls-like</a></li>
+            <li><a href="index.html?categoria=roguelike">Roguelike</a></li>
+            <li><a href="index.html?categoria=fps">FPS</a></li>
+            <li><a href="index.html?categoria=rpg">RPG</a></li>
+        </ul>
+    </nav>
+
+    <main style="padding-top: 100px;">
+        <section class="game-list">
+            
+            <h2 style="display: flex; align-items: center; gap: 10px;">
+                <span class="material-icons" style="color: var(--accent-color);">sports_esports</span> 
+                Minha Biblioteca
+            </h2>
+            
+            <p style="color: #aaa; margin-bottom: 20px;">Jogos adquiridos prontos para instalar.</p>
+
+            <div class="filter-container">
+                <input type="text" id="filtroBiblioteca" class="local-search" placeholder="Buscar nos meus jogos...">
+            </div>
+
+            <div class="cards-container" id="containerBiblioteca">
+            </div>
+        </section>
+    </main>
+
+    <div id="modalDownload" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeDownload">&times;</span>
+            <span class="material-icons check-icon" style="color: #4caf50;">cloud_download</span>
+            <h2 id="tituloDownload">Fazendo Download...</h2>
+            <p>O jogo está sendo baixado e instalado.</p>
+            <p style="font-size: 0.8rem; color: #888; margin-top: 10px;">(Esta janela fechará em breve)</p>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = "http://localhost:3000";
+
+        // --- 1. CONFIGURAÇÕES DE INTERFACE ---
+        const btnMenu = document.getElementById('btnMenu');
+        const sidebar = document.getElementById('sidebar');
+        btnMenu.addEventListener('click', () => sidebar.classList.add('active'));
+        sidebar.addEventListener('mouseleave', () => sidebar.classList.remove('active'));
+
+        // Verifica login
+        const usuarioLogado = localStorage.getItem('usuarioLogado');
+        const usuarioId = localStorage.getItem('usuarioId');
+        const nomeSalvo = localStorage.getItem('nomeUsuario') || "Visitante";
+
+        if (usuarioLogado === 'true' && usuarioId) {
+            // Se logado: Mostra perfil e carrega os jogos
+            document.getElementById('userProfile').classList.remove('hidden');
+            document.getElementById('nomeUsuarioDisplay').innerText = nomeSalvo;
+            carregarBiblioteca();
+        } else {
+            // Se NÃO logado: Mostra aviso e botão para entrar
+            document.getElementById('btnEntrarHeader').classList.remove('hidden');
+            document.querySelector('.game-list').innerHTML = `
+                <div style="text-align:center; margin-top:50px;">
+                    <h2 style="color: #fff;">Faça login para acessar sua biblioteca.</h2>
+                    <br>
+                    <a href="login.html" class="btn-buy" style="text-decoration:none; padding: 10px 30px;">Entrar</a>
+                </div>`;
+        }
+
+        document.getElementById('btnSair')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.clear();
+            window.location.href = "index.html";
+        });
+
+        // --- 2. CARREGAR JOGOS DO SERVIDOR ---
+        async function carregarBiblioteca() {
+            const container = document.getElementById('containerBiblioteca');
+            
+            try {
+                // Rota que busca as compras feitas por este usuário
+                const resposta = await fetch(`${API_URL}/biblioteca/${usuarioId}`);
+                const jogos = await resposta.json();
+
+                if (jogos.length === 0) {
+                    container.innerHTML = "<p style='color: #ccc; margin-top: 20px;'>Você ainda não possui jogos na sua conta.</p>";
+                    return;
+                }
+
+                container.innerHTML = ""; // Limpa a tela
+
+                jogos.forEach((jogo) => {
+                    const card = document.createElement('div');
+                    card.classList.add('card');
+                    // Guarda o nome para o filtro de busca
+                    card.setAttribute('data-name', jogo.titulo.toLowerCase());
+
+                    const imagemCompleta = `${API_URL}/${jogo.imagem_url}`;
+                    
+                    // Formata a data que vem do banco (ex: 2023-10-05 virar 05/10/2023)
+                    const dataCompra = new Date(jogo.data_compra).toLocaleDateString('pt-BR');
+
+                    card.innerHTML = `
+                        <div class="card-image" style="background-image: url('${imagemCompleta}');"></div>
+                        <div class="card-info">
+                            <h3>${jogo.titulo}</h3>
+                            <span class="data-compra">Comprado em: ${dataCompra}</span>
+                            <div style="margin-top: 10px;">
+                                <button onclick="iniciarDownload('${jogo.titulo}')" style="width: 100%; background-color: var(--accent-color); border: none; padding: 12px; border-radius: 5px; color: white; cursor: pointer; font-weight: bold;">
+                                    INSTALAR
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (erro) {
+                console.error("Erro ao carregar biblioteca:", erro);
+                container.innerHTML = "<p style='color: red;'>Erro ao conectar com o servidor.</p>";
+            }
+        }
+
+        // --- 3. FILTRO DE BUSCA LOCAL ---
+        document.getElementById('filtroBiblioteca').addEventListener('input', (e) => {
+            const termo = e.target.value.toLowerCase();
+            const cards = document.querySelectorAll('.card');
+
+            cards.forEach(card => {
+                const nomeJogo = card.getAttribute('data-name');
+                // Esconde ou mostra baseado no nome
+                card.style.display = nomeJogo.includes(termo) ? "flex" : "none";
+            });
+        });
+
+        // --- 4. LÓGICA DO MODAL DE DOWNLOAD ---
+        const modalDownload = document.getElementById('modalDownload');
+        const tituloDownload = document.getElementById('tituloDownload');
+        let timerDownload;
+
+        function iniciarDownload(nomeJogo) {
+            // Atualiza o texto do modal com o nome do jogo clicado
+            tituloDownload.innerText = "Baixando " + nomeJogo + "...";
+            // Mostra o modal (display flex)
+            modalDownload.style.display = "flex";
+            
+            // Fecha sozinho após 5 segundos (simulando fim do download)
+            timerDownload = setTimeout(() => { modalDownload.style.display = "none"; }, 5000);
+        }
+
+        // Fecha o modal se clicar no X
+        document.getElementById('closeDownload').onclick = () => {
+            modalDownload.style.display = "none";
+            clearTimeout(timerDownload); // Cancela o timer se fechar antes
+        };
+    </script>
+</body>
+</html>

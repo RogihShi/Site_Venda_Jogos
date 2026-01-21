@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Games4Player - Detalhes</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <style>
+        /* A seção "Veja Também" no rodapé */
+        .similar-section {
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 1px solid #333; /* Linha divisória sutil */
+        }
+        
+        /* O container que segura os quadradinhos (Scroll Horizontal) */
+        .similar-row {
+            display: flex;
+            gap: 20px;
+            overflow-x: auto; /* Permite rolar para o lado se não caber na tela */
+            padding-bottom: 15px; 
+        }
+
+        /* Estilizando a barra de rolagem para ficar cinza escura e bonita */
+        .similar-row::-webkit-scrollbar { height: 8px; }
+        .similar-row::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        .similar-row::-webkit-scrollbar-track { background: #111; }
+
+        /* O quadradinho de cada jogo sugerido */
+        .mini-card {
+            flex: 0 0 150px; /* Tamanho fixo: não estica nem encolhe */
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        /* Efeito de "pulo" ao passar o mouse */
+        .mini-card:hover { transform: translateY(-5px); }
+
+        .mini-img {
+            width: 150px;
+            height: 150px;
+            background-size: cover;
+            background-position: center;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            border: 1px solid #333;
+        }
+
+        .mini-price {
+            display: block;
+            text-align: center;
+            margin-top: 8px;
+            color: #ccc;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        
+        /* Preço fica roxo quando passa o mouse no card */
+        .mini-card:hover .mini-price { color: var(--accent-color); }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-left">
+            <button class="menu-btn" id="btnMenu"><span class="material-icons">menu</span></button>
+            <a href="index.html" class="logo">Games4Player</a>
+        </div>
+        <div class="search-bar">
+            <input type="text" id="campoPesquisa" placeholder="Pesquisar jogos...">
+            <button id="btnPesquisar"><span class="material-icons">search</span></button>
+        </div>
+        <div class="user-area">
+            <a href="login.html" class="btn-login-header hidden" id="btnEntrarHeader">
+                <span class="material-icons">login</span> Entrar
+            </a>
+            
+            <div class="user-profile hidden" id="userProfile">
+                <span class="material-icons">account_circle</span>
+                <span id="nomeUsuarioDisplay">Visitante</span>
+                <div class="dropdown-menu">
+                    <a href="biblioteca.html">Meus Jogos</a>
+                    <a href="desejos.html">Lista de Desejos</a>
+                    <a href="#" class="logout" id="btnSair">Sair</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <nav class="sidebar" id="sidebar">
+        <h3>Início</h3>
+        <ul><li><a href="index.html" style="display: flex; align-items: center; gap: 10px;"><span class="material-icons">store</span> Loja</a></li></ul>
+        <br>
+        <h3>Categorias</h3>
+        <ul>
+            <li><a href="index.html?categoria=aventura">Aventura</a></li>
+            <li><a href="index.html?categoria=acao">Ação</a></li>
+            <li><a href="index.html?categoria=terror">Terror</a></li>
+            <li><a href="index.html?categoria=metroidvania">Metroidvania</a></li>
+            <li><a href="index.html?categoria=soulslike">Souls-like</a></li>
+            <li><a href="index.html?categoria=roguelike">Roguelike</a></li>
+            <li><a href="index.html?categoria=fps">FPS</a></li>
+            <li><a href="index.html?categoria=rpg">RPG</a></li>
+        </ul>
+    </nav>
+
+    <main class="game-details-container">
+        
+        <h1 class="game-title" id="tituloJogo">Carregando...</h1>
+
+        <div class="game-content">
+            <div class="game-media">
+                <div class="gallery-viewer" id="galeriaViewer">
+                    <button class="gallery-arrow arrow-prev" id="btnPrevImg">❮</button>
+                    <div class="main-image" id="mainDisplay"></div>
+                    <button class="gallery-arrow arrow-next" id="btnNextImg">❯</button>
+                </div>
+                <div class="thumbnails-row" id="thumbnailsContainer"></div>
+            </div>
+
+            <div class="game-sidebar-info">
+                <p class="game-description" id="descJogo">Carregando detalhes...</p>
+                
+                <div class="game-tags" id="tagsContainer"></div>
+
+                <div class="action-buttons">
+                    <button class="btn-wishlist" id="btnWishlist">
+                        <span class="material-icons">favorite_border</span> <span>Lista de Desejos</span>
+                    </button>
+                    <button class="btn-buy-now" id="btnComprar">Carregando...</button>
+                </div>
+                
+                <div class="extra-features" id="featuresContainer">
+                    <div class="feature"><span class="material-icons">person</span><span>Um Jogador</span></div>
+                    <div class="feature"><span class="material-icons">sports_esports</span><span>Compatível com Controle</span></div>
+                    <div class="feature"><span class="material-icons">emoji_events</span><span>Conquistas</span></div>
+                    </div>
+            </div>
+        </div>
+
+        <section class="system-requirements">
+            <h2>Requisitos do Sistema</h2>
+            <div class="req-grid">
+                <div class="req-column">
+                    <h3>Mínimos</h3>
+                    <ul id="reqMinimos"><li>Carregando...</li></ul>
+                </div>
+                <div class="req-column">
+                    <h3>Recomendados</h3>
+                    <ul id="reqRecomendados"><li>Carregando...</li></ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="similar-section">
+            <h2 style="margin-bottom: 20px; font-size: 1.5rem;">Veja Também</h2>
+            <div class="similar-row" id="containerSimilares"></div>
+        </section>
+
+    </main>
+
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script>
+        const API_URL = "http://localhost:3000";
+        
+        // --- 1. LÓGICA DE USUÁRIO (Copiada do Index) ---
+        const btnMenu = document.getElementById('btnMenu');
+        const sidebar = document.getElementById('sidebar');
+        btnMenu.addEventListener('click', () => sidebar.classList.add('active'));
+        sidebar.addEventListener('mouseleave', () => sidebar.classList.remove('active'));
+
+        const usuarioLogado = localStorage.getItem('usuarioLogado') === 'true';
+        const usuarioId = localStorage.getItem('usuarioId');
+        
+        if (usuarioLogado) {
+            document.getElementById('userProfile').classList.remove('hidden');
+            document.getElementById('btnEntrarHeader').classList.add('hidden');
+            document.getElementById('nomeUsuarioDisplay').innerText = localStorage.getItem('nomeUsuario') || "Visitante";
+        } else {
+            document.getElementById('btnEntrarHeader').classList.remove('hidden');
+            document.getElementById('userProfile').classList.add('hidden');
+        }
+        
+        document.getElementById('btnSair')?.addEventListener('click', (e) => {
+            e.preventDefault(); localStorage.clear(); window.location.reload();
+        });
+
+        // --- 2. FUNÇÃO TOAST (Notificações) ---
+        const toastContainer = document.getElementById('toastContainer');
+        function mostrarNotificacao(mensagem, tipo = 'error') {
+            const toast = document.createElement('div');
+            toast.classList.add('toast', tipo);
+            const icone = tipo === 'success' ? 'check_circle' : 'error';
+            toast.innerHTML = `<span class="material-icons">${icone}</span><span>${mensagem}</span>`;
+            toastContainer.appendChild(toast);
+            setTimeout(() => { toast.style.animation = "fadeOut 0.4s ease forwards"; setTimeout(() => toast.remove(), 400); }, 4000);
+        }
+
+        // --- 3. GALERIA DE IMAGENS AUTOMÁTICA ---
+        let imagensGaleria = [];
+        let indiceAtual = 0;
+        let timerGaleria; // Variável para controlar o "slideshow" automático
+        const mainDisplay = document.getElementById('mainDisplay');
+        const thumbnailsContainer = document.getElementById('thumbnailsContainer');
+        const galeriaViewer = document.getElementById('galeriaViewer');
+
+        // Função que descobre as imagens (1.jpg, 2.jpg...) baseada na pasta do jogo
+        function configurarGaleria(caminhoCapa) {
+            imagensGaleria = [];
+            // Pega o caminho da pasta removendo o nome do arquivo da capa
+            const pastaDoJogo = caminhoCapa.substring(0, caminhoCapa.lastIndexOf('/') + 1);
+            
+            // Assume que existem 5 imagens numeradas
+            for (let i = 1; i <= 5; i++) { imagensGaleria.push(`${pastaDoJogo}${i}.jpg`); }
+            
+            thumbnailsContainer.innerHTML = "";
+            
+            // Cria as miniaturas
+            imagensGaleria.forEach((imgSrc, index) => {
+                const thumb = document.createElement('div');
+                thumb.classList.add('thumb');
+                thumb.style.backgroundImage = `url('${imgSrc}')`;
+                
+                // Truque: Verifica se a imagem existe antes de mostrar
+                const imgObj = new Image(); imgObj.src = imgSrc;
+                imgObj.onerror = () => { thumb.style.display = 'none'; }; // Se der erro (não existir), esconde
+                
+                // Ao clicar na miniatura, troca a imagem grande
+                thumb.addEventListener('click', () => { mudarImagem(index); reiniciarTimer(); });
+                thumbnailsContainer.appendChild(thumb);
+            });
+            
+            mudarImagem(0); // Começa na primeira imagem
+            iniciarTimer(); // Começa a rodar sozinho
+        }
+
+        // Função que efetivamente troca a imagem na tela
+        function mudarImagem(index) {
+            indiceAtual = index;
+            const urlImagem = imagensGaleria[indiceAtual];
+            
+            // Efeito de fade (transição suave)
+            mainDisplay.style.opacity = 0; 
+            setTimeout(() => {
+                mainDisplay.style.backgroundImage = `url('${urlImagem}')`;
+                mainDisplay.style.opacity = 1;
+            }, 200);
+
+            // Atualiza a borda roxa na miniatura ativa
+            const thumbs = document.querySelectorAll('.thumb');
+            thumbs.forEach(t => t.classList.remove('active'));
+            if(thumbs[indiceAtual]) thumbs[indiceAtual].classList.add('active');
+        }
+
+        // Funções para passar slides
+        function proximaImagem() { let novoIndice = (indiceAtual + 1) % imagensGaleria.length; mudarImagem(novoIndice); }
+        function imagemAnterior() { let novoIndice = (indiceAtual - 1 + imagensGaleria.length) % imagensGaleria.length; mudarImagem(novoIndice); }
+        
+        // Timer do slideshow
+        function iniciarTimer() { clearInterval(timerGaleria); timerGaleria = setInterval(proximaImagem, 5000); }
+        function reiniciarTimer() { clearInterval(timerGaleria); iniciarTimer(); }
+
+        // Botões de seta
+        document.getElementById('btnNextImg').addEventListener('click', () => { proximaImagem(); reiniciarTimer(); });
+        document.getElementById('btnPrevImg').addEventListener('click', () => { imagemAnterior(); reiniciarTimer(); });
+        
+        // Para de rodar se o mouse estiver em cima da imagem (para ver detalhes)
+        galeriaViewer.addEventListener('mouseenter', clearInterval(timerGaleria));
+        galeriaViewer.addEventListener('mouseleave', iniciarTimer);
+
+        // --- 4. CARREGAR DADOS DO JOGO (GET) ---
+        const params = new URLSearchParams(window.location.search);
+        const gameId = params.get('id'); // Pega o ID da URL (ex: ?id=5)
+        const tagsContainer = document.getElementById('tagsContainer');
+        const featuresContainer = document.getElementById('featuresContainer');
+        const btnComprar = document.getElementById('btnComprar');
+        const btnWishlist = document.getElementById('btnWishlist');
+
+        async function carregarJogo() {
+            if (!gameId) return window.location.href = "index.html"; // Se não tem ID, volta pro início
+
+            try {
+                const res = await fetch(`${API_URL}/jogos/${gameId}`);
+                const jogo = await res.json();
+
+                // Preenche textos básicos
+                document.getElementById('tituloJogo').innerText = jogo.titulo;
+                const preco = parseFloat(jogo.preco).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                btnComprar.innerText = `Comprar - ${preco}`;
+
+                configurarGaleria(`${API_URL}/${jogo.imagem_url}`);
+                document.getElementById('descJogo').innerText = jogo.descricao || `Prepare-se para uma experiência inesquecível em ${jogo.titulo}.`;
+
+                // Monta as TAGS (Botões cinzas: RPG, Ação...)
+                tagsContainer.innerHTML = "";
+                const extras = featuresContainer.querySelectorAll('.feature-extra');
+                extras.forEach(e => e.remove()); // Limpa ícones extras antigos
+
+                if(jogo.categorias) {
+                    jogo.categorias.forEach(cat => {
+                        const tag = document.createElement('span');
+                        tag.classList.add('tag');
+                        tag.innerText = cat.charAt(0).toUpperCase() + cat.slice(1);
+                        tagsContainer.appendChild(tag);
+                        
+                        // Lógica para adicionar ícones de Multiplayer/Coop automaticamente
+                        const termo = cat.toLowerCase();
+                        if ((termo.includes('multi') || termo.includes('online')) && !termo.includes('coop')) {
+                            if (!document.getElementById('feat-multi')) {
+                                const feat = document.createElement('div');
+                                feat.className = 'feature feature-extra';
+                                feat.id = 'feat-multi';
+                                feat.innerHTML = `<span class="material-icons">public</span><span>Multijogador Online</span>`;
+                                featuresContainer.appendChild(feat);
+                            }
+                        }
+                        if (termo.includes('coop')) {
+                            if (!document.getElementById('feat-coop')) {
+                                const feat = document.createElement('div');
+                                feat.className = 'feature feature-extra';
+                                feat.id = 'feat-coop';
+                                feat.innerHTML = `<span class="material-icons">groups</span><span>Coop Online</span>`;
+                                featuresContainer.appendChild(feat);
+                            }
+                        }
+                    });
+                }
+
+                // Preenche a tabela de Requisitos
+                document.getElementById('reqMinimos').innerHTML = `
+                    <li><strong>SO:</strong> <span>${jogo.min_os || 'Windows 10'}</span></li>
+                    <li><strong>Processador:</strong> <span>${jogo.min_cpu || 'Intel Core i5'}</span></li>
+                    <li><strong>Memória:</strong> <span>${jogo.min_mem || '8 GB RAM'}</span></li>
+                    <li><strong>Gráficos:</strong> <span>${jogo.min_gpu || 'GTX 960'}</span></li>
+                    <li><strong>Armazenamento:</strong> <span>${jogo.min_arm || '40 GB'}</span></li>
+                `;
+                document.getElementById('reqRecomendados').innerHTML = `
+                    <li><strong>SO:</strong> <span>${jogo.rec_os || 'Windows 10'}</span></li>
+                    <li><strong>Processador:</strong> <span>${jogo.rec_cpu || 'Intel Core i7'}</span></li>
+                    <li><strong>Memória:</strong> <span>${jogo.rec_mem || '16 GB RAM'}</span></li>
+                    <li><strong>Gráficos:</strong> <span>${jogo.rec_gpu || 'GTX 1060'}</span></li>
+                    <li><strong>Armazenamento:</strong> <span>${jogo.rec_arm || 'SSD'}</span></li>
+                `;
+
+                // Se estiver logado, verifica se já comprou para mudar o botão
+                if (usuarioLogado) verificarStatus();
+                
+                // Carrega os jogos sugeridos no rodapé
+                carregarSimilares();
+
+            } catch (erro) { console.error(erro); }
+        }
+
+        // --- 5. CARREGAR JOGOS SIMILARES (Rodapé) ---
+        async function carregarSimilares() {
+            try {
+                const res = await fetch(`${API_URL}/jogos`);
+                let jogos = await res.json();
+                
+                // Remove o jogo atual da lista (para não sugerir ele mesmo)
+                jogos = jogos.filter(j => j.id != gameId);
+                // Embaralha
+                jogos.sort(() => Math.random() - 0.5);
+                // Pega os 7 primeiros
+                const selecionados = jogos.slice(0, 7);
+                
+                const container = document.getElementById('containerSimilares');
+                container.innerHTML = "";
+                selecionados.forEach(j => {
+                    const div = document.createElement('div');
+                    div.className = 'mini-card';
+                    div.onclick = () => window.location.href = `paginaJogo.html?id=${j.id}`;
+                    const precoF = parseFloat(j.preco).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                    div.innerHTML = `
+                        <div class="mini-img" style="background-image: url('${API_URL}/${j.imagem_url}')"></div>
+                        <span class="mini-price">${precoF}</span>
+                    `;
+                    container.appendChild(div);
+                });
+            } catch (e) { console.error(e); }
+        }
+
+        // --- 6. VERIFICAR SE O USUÁRIO JÁ TEM O JOGO ---
+        async function verificarStatus() {
+            try {
+                // Checa biblioteca
+                const resBib = await fetch(`${API_URL}/biblioteca/${usuarioId}`);
+                const biblioteca = await resBib.json();
+                
+                // Se o jogo está na biblioteca
+                if (biblioteca.some(j => j.id == gameId)) {
+                    btnComprar.innerText = "INSTALAR"; // Muda o texto
+                    btnComprar.style.backgroundColor = "#333"; // Muda a cor pra cinza
+                    btnComprar.style.cursor = "pointer";
+                    btnWishlist.style.display = "none"; // Esconde o botão de desejo (não precisa mais)
+                    return;
+                }
+                
+                // Checa lista de desejos
+                const resDes = await fetch(`${API_URL}/desejos/${usuarioId}`);
+                const desejos = await resDes.json();
+                const icone = btnWishlist.querySelector('.material-icons');
+                const textoBtn = btnWishlist.querySelector('span:not(.material-icons)');
+                
+                if (desejos.some(j => j.id == gameId)) {
+                    icone.innerText = 'favorite'; // Coração cheio
+                    icone.style.color = '#ff4d4d'; // Vermelho
+                    textoBtn.innerText = "Remover da Lista de Desejos";
+                } else {
+                    icone.innerText = 'favorite_border'; // Coração vazio
+                    icone.style.color = 'white';
+                    textoBtn.innerText = "Lista de Desejos";
+                }
+            } catch (err) {}
+        }
+
+        // --- 7. EVENTOS DE CLIQUE (COMPRA) ---
+        btnComprar.addEventListener('click', async () => {
+            // Se for botão de Instalar, manda pra biblioteca
+            if (btnComprar.innerText === "INSTALAR") { 
+                window.location.href = "biblioteca.html"; 
+                return; 
+            }
+
+            // SE NÃO ESTIVER LOGADO: Redireciona para Login
+            if (!usuarioLogado) {
+                mostrarNotificacao("Faça login para comprar! Redirecionando...", "error");
+                setTimeout(() => {
+                    window.location.href = "login.html";
+                }, 2000);
+                return;
+            }
+
+            // Processo de Compra
+            btnComprar.innerText = "Processando...";
+            const res = await fetch(`${API_URL}/comprar`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ usuario_id: usuarioId, jogo_id: gameId })
+            });
+            const dados = await res.json();
+            
+            if (dados.sucesso) {
+                mostrarNotificacao("Compra realizada!", "success");
+                verificarStatus(); // Atualiza o botão para "Instalar"
+            } else {
+                mostrarNotificacao(dados.mensagem, "error");
+                carregarJogo(); // Reseta o botão
+            }
+        });
+
+        // Evento de Lista de Desejos (Adicionar/Remover)
+        btnWishlist.addEventListener('click', async () => {
+            if (!usuarioLogado) {
+                mostrarNotificacao("Faça login primeiro!", "error");
+                return;
+            }
+            const icone = btnWishlist.querySelector('.material-icons');
+            const ehRemocao = icone.innerText === 'favorite';
+            
+            if (ehRemocao) {
+                // DELETE
+                try {
+                    const res = await fetch(`${API_URL}/desejos/${usuarioId}/${gameId}`, { method: 'DELETE' });
+                    if (res.ok) { mostrarNotificacao("Removido da Lista de Desejos", "success"); verificarStatus(); }
+                } catch (err) {}
+            } else {
+                // POST (Adicionar)
+                try {
+                    const res = await fetch(`${API_URL}/desejos`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ usuario_id: usuarioId, jogo_id: gameId })
+                    });
+                    if (res.ok) { mostrarNotificacao("Adicionado à Lista de Desejos!", "success"); verificarStatus(); }
+                } catch (err) {}
+            }
+        });
+
+        // Barra de Pesquisa
+        const campoPesquisa = document.getElementById('campoPesquisa');
+        const btnPesquisar = document.getElementById('btnPesquisar');
+        function realizarPesquisa() { if(campoPesquisa.value) window.location.href = `index.html?busca=${campoPesquisa.value}`; }
+        btnPesquisar.addEventListener('click', realizarPesquisa);
+        campoPesquisa.addEventListener('keyup', (e) => { if (e.key === 'Enter') realizarPesquisa(); });
+
+        // Inicia
+        carregarJogo();
+    </script>
+</body>
+</html>
